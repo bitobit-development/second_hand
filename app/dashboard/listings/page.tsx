@@ -11,6 +11,7 @@ import { Separator } from '@/components/ui/separator'
 import { getCategoryConfig, getConditionConfig, formatZAR } from '@/lib/constants/categories'
 import { deleteListing, pauseListing, resumeListing } from '@/app/listings/create/actions'
 import { ListingStatus } from '@/lib/generated/prisma'
+import { serializeDecimal } from '@/lib/helpers/listing-helpers'
 
 type ListingCardProps = {
   listing: {
@@ -153,7 +154,7 @@ export default async function MyListingsPage() {
   const session = await requireAuth()
 
   // Fetch user's listings
-  const listings = await prisma.listing.findMany({
+  const rawListings = await prisma.listing.findMany({
     where: { sellerId: session.user.id },
     orderBy: { createdAt: 'desc' },
     select: {
@@ -169,6 +170,12 @@ export default async function MyListingsPage() {
       createdAt: true,
     },
   })
+
+  // Serialize listings for client
+  const listings = rawListings.map((listing) => ({
+    ...listing,
+    price: serializeDecimal(listing.price),
+  }))
 
   // Group listings by status
   const activeListings = listings.filter((l) => l.status === 'APPROVED')

@@ -124,15 +124,15 @@ export async function getListings(
       where.AND = where.AND || [];
       const priceFilter: Prisma.ListingWhereInput = {};
 
-      if (minPrice !== undefined) {
-        priceFilter.price = { gte: new Prisma.Decimal(minPrice) };
-      }
-
-      if (maxPrice !== undefined) {
+      if (minPrice !== undefined && maxPrice !== undefined) {
         priceFilter.price = {
-          ...priceFilter.price,
+          gte: new Prisma.Decimal(minPrice),
           lte: new Prisma.Decimal(maxPrice),
         };
+      } else if (minPrice !== undefined) {
+        priceFilter.price = { gte: new Prisma.Decimal(minPrice) };
+      } else if (maxPrice !== undefined) {
+        priceFilter.price = { lte: new Prisma.Decimal(maxPrice) };
       }
 
       (where.AND as Prisma.ListingWhereInput[]).push(priceFilter);

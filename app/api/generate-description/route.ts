@@ -138,7 +138,7 @@ export async function POST(req: NextRequest) {
         const validationResult = GenerateDescriptionSchema.safeParse(body);
 
         if (!validationResult.success) {
-          const firstError = validationResult.error.errors[0];
+          const firstError = validationResult.error.issues[0];
           return Response.json(
             {
               success: false,

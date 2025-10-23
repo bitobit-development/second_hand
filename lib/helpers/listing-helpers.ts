@@ -3,6 +3,17 @@
  * Utilities for working with listing data on the frontend
  */
 
+import { Decimal } from '@/lib/generated/prisma/runtime/library'
+
+/**
+ * Convert Prisma Decimal to string for JSON serialization
+ * Handles null/undefined values safely
+ */
+export const serializeDecimal = (value: Decimal | null | undefined): string | null => {
+  if (!value) return null
+  return value.toString()
+}
+
 /**
  * Convert Decimal string from backend to number for display
  * Handles null/undefined values safely

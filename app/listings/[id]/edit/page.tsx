@@ -41,11 +41,20 @@ export default async function EditListingPage({ params }: PageProps) {
     redirect('/dashboard/listings')
   }
 
-  // Convert Decimal to number for form
+  // Convert Decimal to number and serialize for form
   const listingData = {
-    ...listing,
+    id: listing.id,
+    title: listing.title,
+    description: listing.description,
+    category: listing.category,
+    condition: listing.condition,
+    images: listing.images,
+    primaryImage: listing.primaryImage,
+    pricingType: listing.pricingType,
     price: listing.price ? parseFloat(listing.price.toString()) : undefined,
     minOffer: listing.minOffer ? parseFloat(listing.minOffer.toString()) : undefined,
+    city: listing.city,
+    province: listing.province,
   }
 
   return (
@@ -64,7 +73,7 @@ export default async function EditListingPage({ params }: PageProps) {
         )}
       </div>
 
-      <EditListingForm listing={listingData} />
+      <EditListingForm listing={listingData as any} />
     </div>
   )
 }

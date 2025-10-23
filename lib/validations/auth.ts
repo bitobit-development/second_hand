@@ -39,9 +39,7 @@ export const registerSchema = z
       .optional()
       .or(z.literal("")),
     province: z
-      .enum(SA_PROVINCES, {
-        errorMap: () => ({ message: "Please select a valid province" }),
-      })
+      .enum(SA_PROVINCES, { message: "Please select a valid province" })
       .optional()
       .or(z.literal("")),
     password: z
