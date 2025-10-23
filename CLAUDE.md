@@ -129,6 +129,17 @@ The project uses `@/*` path alias mapping to root directory:
 - SellFAB component provides quick access from any page
 - User journey: Click "Sell" → Auth check → `/listings/create`
 
+**AI-Powered Listing Creation**
+- OpenAI GPT-4o Vision API integration for intelligent content generation
+- Flow: Upload images → AI generates title AND description from images
+- Multi-step form order: Category → Images → AI-Assisted Details → Pricing → Location
+- AI description generator component: `/components/listings/ai-description-generator.tsx`
+- API endpoint: `/app/api/generate-description/route.ts`
+- Three template styles: Detailed, Concise, Storytelling
+- Title extraction via regex pattern: `/^TITLE:\s*(.+?)(?:\n\n|\n)/`
+- User can edit AI suggestions before applying
+- Templates in `/lib/ai/prompts/description-templates.ts`
+
 ### Styling Approach
 - Tailwind CSS v4 with CSS variables for theming
 - `cn()` utility function for merging class names (clsx + tailwind-merge)
@@ -149,7 +160,13 @@ The project uses `@/*` path alias mapping to root directory:
 - **Selling Flow**: User clicks "Sell" → `/sell` gateway → Auth check → `/listings/create` form
   - Unauthenticated: `/sell` → `/auth/login?callbackUrl=/listings/create` → `/listings/create`
   - Authenticated: `/sell` → `/listings/create`
-- **Listing Creation**: Multi-step form → Admin approval → Public listing
+- **Listing Creation**: Multi-step form (5 steps) → Admin approval → Public listing
+  1. Category selection
+  2. Image upload (up to 10 images via Cloudinary)
+  3. Details (title + description, with AI generation option)
+  4. Pricing (fixed price or accept offers)
+  5. Location (city + province)
+- **AI-Assisted Content**: After uploading images, users can generate title and description via GPT-4o Vision
 - **Pricing Options**: Fixed price OR accept offers (with optional minimum)
 - **Commission**: 20% platform fee on all successful transactions
 - **Approval Process**: All user-created listings require admin approval before going live
@@ -328,6 +345,7 @@ EMAIL_FROM                # Sender email address
 CLOUDINARY_CLOUD_NAME     # Cloudinary cloud name
 CLOUDINARY_API_KEY        # Cloudinary API key
 CLOUDINARY_API_SECRET     # Cloudinary API secret
+OPENAI_API_KEY            # OpenAI API key for GPT-4o Vision (AI description generation)
 ```
 
 ## Important Notes
@@ -361,7 +379,38 @@ CLOUDINARY_API_SECRET     # Cloudinary API secret
 **Currency**
 - South African Rand (ZAR)
 - Format: "R" prefix with comma thousands separator
-- Example: "R1,299.00", "R285,000"
+- Example: "R 1,299" (no decimals for whole amounts), "R 15,999.95" (with decimals)
+- Helper function: `formatZAR()` in `/lib/constants/categories.ts`
+- IMPORTANT: Uses manual formatting (not `Intl.NumberFormat`) to ensure consistent server/client rendering and avoid hydration mismatches
+
+**React Icon Component Rendering**
+- NEVER render icon components directly as `{category.icon}` or `{config?.icon}`
+- ALWAYS extract the component first, then render as JSX:
+  ```typescript
+  const Icon = category.icon
+  {Icon && <Icon className="w-4 h-4" />}
+  ```
+- This prevents "Objects are not valid as a React child" errors
+
+**Controlled Input Patterns**
+- For text/enum fields: Use empty string (`''`) as default value, not `undefined`
+- For number fields: Use `undefined` as default, then explicitly control value:
+  ```typescript
+  <Input
+    type="number"
+    value={field.value ?? ''}
+    onChange={(e) => {
+      const value = e.target.value ? parseFloat(e.target.value) : undefined
+      field.onChange(value)
+    }}
+  />
+  ```
+- This prevents "uncontrolled to controlled" React warnings
+
+**Hydration Best Practices**
+- Add `suppressHydrationWarning` to `<html>` and `<body>` tags to handle browser extension interference
+- Use consistent formatting between server and client (especially for numbers, dates, locales)
+- Avoid `Intl.NumberFormat` or locale-dependent formatting that differs between environments
 
 **TypeScript Configuration**
 - Strict mode enabled

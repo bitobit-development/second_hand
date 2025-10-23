@@ -15,6 +15,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Progress } from '@/components/ui/progress'
 import { ImageUpload } from '@/components/listings/image-upload'
 import { ListingPreview } from '@/components/listings/listing-preview'
+import { AIImageEnhancer } from '@/components/listings/ai-image-enhancer'
+import { AIDescriptionGenerator } from '@/components/listings/ai-description-generator'
 import { createListing } from './actions'
 import {
   createListingSchema,
@@ -30,8 +32,8 @@ import { toast } from 'sonner'
 
 const STEPS = [
   { id: 1, name: 'Category', description: 'Choose a category' },
-  { id: 2, name: 'Details', description: 'Describe your item' },
-  { id: 3, name: 'Images', description: 'Add photos' },
+  { id: 2, name: 'Images', description: 'Add photos' },
+  { id: 3, name: 'Details', description: 'Describe your item' },
   { id: 4, name: 'Pricing', description: 'Set your price' },
   { id: 5, name: 'Location', description: 'Where is it?' },
   { id: 6, name: 'Preview', description: 'Review and submit' },
@@ -41,21 +43,24 @@ export default function CreateListingPage() {
   const router = useRouter()
   const [currentStep, setCurrentStep] = useState(1)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [aiEnhancedImages, setAiEnhancedImages] = useState(false)
+  const [aiGeneratedDesc, setAiGeneratedDesc] = useState(false)
+  const [originalImages, setOriginalImages] = useState<string[]>([])
 
   const form = useForm<CreateListingFormData>({
     resolver: zodResolver(createListingSchema),
     defaultValues: {
-      category: undefined,
+      category: '' as any,
       title: '',
       description: '',
-      condition: undefined,
+      condition: '' as any,
       images: [],
       primaryImage: '',
-      pricingType: undefined,
+      pricingType: '' as any,
       price: undefined,
       minOffer: undefined,
       city: '',
-      province: undefined,
+      province: '' as any,
     },
     mode: 'onChange',
   })
@@ -71,9 +76,9 @@ export default function CreateListingPage() {
       case 1:
         return await trigger('category')
       case 2:
-        return await trigger(['title', 'description', 'condition'])
-      case 3:
         return await trigger(['images', 'primaryImage'])
+      case 3:
+        return await trigger(['title', 'description', 'condition'])
       case 4:
         return await trigger(['pricingType', 'price', 'minOffer'])
       case 5:
@@ -97,8 +102,8 @@ export default function CreateListingPage() {
   const handleEditSection = (section: string) => {
     const stepMap: Record<string, number> = {
       category: 1,
-      details: 2,
-      images: 3,
+      images: 2,
+      details: 3,
       pricing: 4,
       location: 5,
     }
@@ -109,7 +114,13 @@ export default function CreateListingPage() {
     setIsSubmitting(true)
 
     try {
-      const result = await createListing(data)
+      // Include AI metadata in submission
+      const result = await createListing({
+        ...data,
+        aiEnhancedImages,
+        aiGeneratedDesc,
+        originalImages,
+      } as any)
 
       if (result.success && result.data) {
         toast.success('Listing created successfully!')
@@ -229,8 +240,95 @@ export default function CreateListingPage() {
             </Card>
           )}
 
-          {/* Step 2: Details */}
+          {/* Step 2: Images */}
           {currentStep === 2 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Add Images</CardTitle>
+                <CardDescription>
+                  Upload photos of your item (1-10 images)
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <FormField
+                  control={form.control}
+                  name="images"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <ImageUpload
+                          images={field.value || []}
+                          primaryImage={watchAllFields.primaryImage || ''}
+                          onChange={(images, primaryImage) => {
+                            setValue('images', images)
+                            setValue('primaryImage', primaryImage)
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* AI Image Enhancer - shown after images uploaded */}
+                {watchAllFields.images && watchAllFields.images.length > 0 && (
+                  <div className="space-y-4">
+                    <div className="border-t pt-4">
+                      <h3 className="text-sm font-medium mb-3">
+                        Enhance Your Images with AI
+                      </h3>
+                      <p className="text-xs text-muted-foreground mb-4">
+                        Remove backgrounds and add professional white backgrounds to make your items stand out
+                      </p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {watchAllFields.images.slice(0, 3).map((imageUrl, index) => (
+                          <AIImageEnhancer
+                            key={imageUrl}
+                            imageUrl={imageUrl}
+                            onEnhanced={(enhancedUrl, originalUrl) => {
+                              const currentImages = watchAllFields.images || []
+                              const imageIndex = currentImages.indexOf(originalUrl)
+
+                              if (imageIndex !== -1) {
+                                // Store original if not already stored
+                                if (!originalImages.includes(originalUrl)) {
+                                  setOriginalImages([...originalImages, originalUrl])
+                                }
+
+                                // Replace with enhanced version
+                                const newImages = [...currentImages]
+                                newImages[imageIndex] = enhancedUrl
+                                setValue('images', newImages)
+
+                                // Update primary image if needed
+                                if (watchAllFields.primaryImage === originalUrl) {
+                                  setValue('primaryImage', enhancedUrl)
+                                }
+
+                                setAiEnhancedImages(true)
+                                toast.success(`Image ${index + 1} enhanced successfully!`)
+                              }
+                            }}
+                            onError={(error) => {
+                              toast.error(`Failed to enhance image ${index + 1}: ${error}`)
+                            }}
+                          />
+                        ))}
+                      </div>
+                      {watchAllFields.images.length > 3 && (
+                        <p className="text-xs text-muted-foreground mt-2">
+                          Showing first 3 images. Enhance them individually after upload.
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Step 3: Details */}
+          {currentStep === 3 && (
             <Card>
               <CardHeader>
                 <CardTitle>Item Details</CardTitle>
@@ -239,6 +337,26 @@ export default function CreateListingPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
+                {/* AI Description Generator with Title - shown if images uploaded */}
+                {watchAllFields.images && watchAllFields.images.length > 0 && watchAllFields.category && (
+                  <AIDescriptionGenerator
+                    imageUrls={watchAllFields.images}
+                    category={watchAllFields.category}
+                    onGenerated={(description) => {
+                      setValue('description', description)
+                      setAiGeneratedDesc(true)
+                    }}
+                    onTitleGenerated={(title) => {
+                      setValue('title', title)
+                    }}
+                    onError={(error) => {
+                      toast.error(error)
+                    }}
+                    currentDescription={watchAllFields.description}
+                    currentTitle={watchAllFields.title}
+                  />
+                )}
+
                 <FormField
                   control={form.control}
                   name="title"
@@ -329,39 +447,6 @@ export default function CreateListingPage() {
             </Card>
           )}
 
-          {/* Step 3: Images */}
-          {currentStep === 3 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Add Images</CardTitle>
-                <CardDescription>
-                  Upload photos of your item (1-10 images)
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <FormField
-                  control={form.control}
-                  name="images"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <ImageUpload
-                          images={field.value || []}
-                          primaryImage={watchAllFields.primaryImage || ''}
-                          onChange={(images, primaryImage) => {
-                            setValue('images', images)
-                            setValue('primaryImage', primaryImage)
-                          }}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </CardContent>
-            </Card>
-          )}
-
           {/* Step 4: Pricing */}
           {currentStep === 4 && (
             <Card>
@@ -439,11 +524,14 @@ export default function CreateListingPage() {
                               type="number"
                               placeholder="1500.00"
                               className="pl-7"
-                              {...field}
+                              value={field.value ?? ''}
                               onChange={(e) => {
                                 const value = e.target.value ? parseFloat(e.target.value) : undefined
                                 field.onChange(value)
                               }}
+                              onBlur={field.onBlur}
+                              name={field.name}
+                              ref={field.ref}
                             />
                           </div>
                         </FormControl>
@@ -472,11 +560,14 @@ export default function CreateListingPage() {
                               type="number"
                               placeholder="1000.00"
                               className="pl-7"
-                              {...field}
+                              value={field.value ?? ''}
                               onChange={(e) => {
                                 const value = e.target.value ? parseFloat(e.target.value) : undefined
                                 field.onChange(value)
                               }}
+                              onBlur={field.onBlur}
+                              name={field.name}
+                              ref={field.ref}
                             />
                           </div>
                         </FormControl>

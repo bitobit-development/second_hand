@@ -118,6 +118,9 @@ model Listing {
   condition       ListingCondition
   images          String[]
   primaryImage    String
+  aiEnhancedImages Boolean         @default(false)
+  aiGeneratedDesc Boolean          @default(false)
+  originalImages  String[]         @default([])
   pricingType     PricingType
   price           Decimal?         @db.Decimal(10, 2)
   minOffer        Decimal?         @db.Decimal(10, 2)

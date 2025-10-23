@@ -111,6 +111,10 @@ export type CreateListingFormData = z.infer<typeof createListingSchema>
 // Server-side validation for creating a listing
 export const serverCreateListingSchema = createListingSchema.extend({
   sellerId: z.string().uuid('Invalid seller ID'),
+  // AI metadata fields (optional)
+  aiEnhancedImages: z.boolean().optional(),
+  aiGeneratedDesc: z.boolean().optional(),
+  originalImages: z.array(z.string().url('Invalid original image URL')).optional(),
 })
 
 export type ServerCreateListingData = z.infer<typeof serverCreateListingSchema>

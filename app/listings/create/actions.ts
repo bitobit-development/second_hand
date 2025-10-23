@@ -52,6 +52,10 @@ export const createListing = async (
         city: validated.city,
         province: validated.province,
         status: 'PENDING', // All new listings require approval
+        // AI metadata fields
+        aiEnhancedImages: validated.aiEnhancedImages ?? false,
+        aiGeneratedDesc: validated.aiGeneratedDesc ?? false,
+        originalImages: validated.originalImages ?? [],
       },
     })
 

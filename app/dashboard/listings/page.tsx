@@ -41,6 +41,7 @@ const ListingCard = ({ listing }: ListingCardProps) => {
 
   const status = statusConfig[listing.status]
   const StatusIcon = status.icon
+  const CategoryIcon = categoryConfig?.icon
 
   return (
     <Card>
@@ -72,7 +73,10 @@ const ListingCard = ({ listing }: ListingCardProps) => {
             </div>
 
             <div className="flex flex-wrap items-center gap-2 mb-3 text-xs text-muted-foreground">
-              <span>{categoryConfig?.icon} {categoryConfig?.label}</span>
+              <span className="flex items-center gap-1">
+                {CategoryIcon && <CategoryIcon className="w-3 h-3" />}
+                {categoryConfig?.label}
+              </span>
               <span>•</span>
               <span>{conditionConfig?.label}</span>
               <span>•</span>

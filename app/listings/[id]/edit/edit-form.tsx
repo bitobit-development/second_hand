@@ -85,22 +85,25 @@ export const EditListingForm = ({ listing }: EditListingFormProps) => {
                 <FormItem>
                   <FormControl>
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-                      {CATEGORIES.map((category) => (
-                        <button
-                          key={category.value}
-                          type="button"
-                          onClick={() => field.onChange(category.value)}
-                          className={cn(
-                            'p-3 rounded-lg border-2 transition-all text-left hover:border-primary',
-                            field.value === category.value
-                              ? 'border-primary bg-primary/5'
-                              : 'border-muted'
-                          )}
-                        >
-                          <div className="text-2xl mb-1">{category.icon}</div>
-                          <p className="text-xs font-medium">{category.label}</p>
-                        </button>
-                      ))}
+                      {CATEGORIES.map((category) => {
+                        const Icon = category.icon
+                        return (
+                          <button
+                            key={category.value}
+                            type="button"
+                            onClick={() => field.onChange(category.value)}
+                            className={cn(
+                              'p-3 rounded-lg border-2 transition-all text-left hover:border-primary',
+                              field.value === category.value
+                                ? 'border-primary bg-primary/5'
+                                : 'border-muted'
+                            )}
+                          >
+                            <div className="text-2xl mb-1"><Icon /></div>
+                            <p className="text-xs font-medium">{category.label}</p>
+                          </button>
+                        )
+                      })}
                     </div>
                   </FormControl>
                   <FormMessage />

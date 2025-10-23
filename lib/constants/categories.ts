@@ -145,12 +145,18 @@ export const getConditionConfig = (value: ListingCondition): ConditionConfig | u
 // Helper function to format ZAR currency
 export const formatZAR = (amount: number | string): string => {
   const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount
-  return new Intl.NumberFormat('en-ZA', {
-    style: 'currency',
-    currency: 'ZAR',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
-  }).format(numAmount)
+
+  // Manual formatting to ensure consistency between server and client
+  const parts = numAmount.toFixed(2).split('.')
+  const integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+  const decimalPart = parts[1]
+
+  // Only include decimals if they're not .00
+  if (decimalPart === '00') {
+    return `R ${integerPart}`
+  }
+
+  return `R ${integerPart}.${decimalPart}`
 }
 
 // Calculate 20% commission

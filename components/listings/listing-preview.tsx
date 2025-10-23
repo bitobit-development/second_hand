@@ -42,6 +42,9 @@ export const ListingPreview = ({ data, onEdit }: ListingPreviewProps) => {
   const categoryConfig = getCategoryConfig(data.category)
   const conditionConfig = getConditionConfig(data.condition)
 
+  // Get icon component
+  const CategoryIcon = categoryConfig?.icon
+
   const commission = data.price ? calculateCommission(data.price) : 0
   const netAmount = data.price ? calculateNetAmount(data.price) : 0
 
@@ -100,7 +103,7 @@ export const ListingPreview = ({ data, onEdit }: ListingPreviewProps) => {
               <h2 className="text-2xl sm:text-3xl font-bold mb-2">{data.title}</h2>
               <div className="flex flex-wrap items-center gap-2">
                 <Badge variant="secondary">
-                  {categoryConfig?.icon} {categoryConfig?.label}
+                  {CategoryIcon && <CategoryIcon className="inline w-4 h-4 mr-1" />} {categoryConfig?.label}
                 </Badge>
                 <Badge variant="outline">{conditionConfig?.label}</Badge>
               </div>

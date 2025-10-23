@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useState } from 'react'
+import { useCallback, useState, useEffect } from 'react'
 import { useDropzone } from 'react-dropzone'
 import { X, Upload, Loader2, MoveVertical, Star } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -34,6 +34,25 @@ export const ImageUpload = ({
     images.map((url) => ({ url }))
   )
   const [isDragging, setIsDragging] = useState(false)
+
+  // Sync imageFiles to parent component via onChange
+  useEffect(() => {
+    const uploadedUrls = imageFiles
+      .filter((img) => !img.uploading && !img.error)
+      .map((img) => img.url)
+
+    const currentPrimary = primaryImage || uploadedUrls[0] || ''
+
+    // Only call onChange if there's a change
+    const hasChanged =
+      uploadedUrls.length !== images.length ||
+      uploadedUrls.some((url, i) => url !== images[i]) ||
+      currentPrimary !== primaryImage
+
+    if (hasChanged && uploadedUrls.length > 0) {
+      onChange(uploadedUrls, currentPrimary)
+    }
+  }, [imageFiles])
 
   const uploadToCloudinary = async (file: File): Promise<string> => {
     const formData = new FormData()
@@ -113,16 +132,6 @@ export const ImageUpload = ({
           })
         }
       }
-
-      // Update parent component
-      const uploadedUrls = imageFiles
-        .filter((img) => !img.uploading && !img.error)
-        .map((img) => img.url)
-
-      onChange(
-        uploadedUrls,
-        primaryImage || uploadedUrls[0] || ''
-      )
     },
     [imageFiles, maxImages, maxSizeInMB, onChange, primaryImage]
   )
