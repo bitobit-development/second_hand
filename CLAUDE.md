@@ -101,6 +101,16 @@ The project uses `@/*` path alias mapping to root directory:
 - Pattern: `*-wrapper.tsx` (client) wraps pure UI component (can be server/client)
 - URL state synced via `useSearchParams()` and `router.push()`
 - Examples: `search-bar-wrapper.tsx`, `filter-panel-wrapper.tsx`
+- **CRITICAL**: When using `useEffect` with `searchParams` dependency and `router.push()`, ALWAYS check if URL actually changed before pushing to prevent infinite loops:
+  ```typescript
+  useEffect(() => {
+    const newUrl = buildUrl()
+    const currentUrl = getCurrentUrl()
+    if (newUrl !== currentUrl) {
+      router.push(newUrl, { scroll: false })
+    }
+  }, [filters, router, searchParams])
+  ```
 
 **Prisma Client Usage**
 - ALWAYS import from `@/lib/prisma` (singleton instance)
@@ -160,12 +170,14 @@ The project uses `@/*` path alias mapping to root directory:
 - **Selling Flow**: User clicks "Sell" → `/sell` gateway → Auth check → `/listings/create` form
   - Unauthenticated: `/sell` → `/auth/login?callbackUrl=/listings/create` → `/listings/create`
   - Authenticated: `/sell` → `/listings/create`
-- **Listing Creation**: Multi-step form (5 steps) → Admin approval → Public listing
+- **Listing Creation**: Multi-step form (6 steps) → Admin approval → Public listing
   1. Category selection
   2. Image upload (up to 10 images via Cloudinary)
   3. Details (title + description, with AI generation option)
   4. Pricing (fixed price or accept offers)
   5. Location (city + province)
+  6. Preview and Submit
+- **Preview Submit Pattern**: After submission, listing is saved but user stays on preview page with "Continue" button instead of auto-redirecting. This allows users to review their final listing before proceeding to success page.
 - **AI-Assisted Content**: After uploading images, users can generate title and description via GPT-4o Vision
 - **Pricing Options**: Fixed price OR accept offers (with optional minimum)
 - **Commission**: 20% platform fee on all successful transactions

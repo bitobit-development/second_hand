@@ -46,6 +46,7 @@ export default function CreateListingPage() {
   const [aiEnhancedImages, setAiEnhancedImages] = useState(false)
   const [aiGeneratedDesc, setAiGeneratedDesc] = useState(false)
   const [originalImages, setOriginalImages] = useState<string[]>([])
+  const [submittedListingId, setSubmittedListingId] = useState<string | null>(null)
 
   const form = useForm<CreateListingFormData>({
     resolver: zodResolver(createListingSchema),
@@ -124,7 +125,8 @@ export default function CreateListingPage() {
 
       if (result.success && result.data) {
         toast.success('Listing created successfully!')
-        router.push(`/listings/success?id=${result.data.id}`)
+        // Store the listing ID but stay on preview page
+        setSubmittedListingId(result.data.id)
       } else {
         toast.error(result.error || 'Failed to create listing')
       }
@@ -133,6 +135,12 @@ export default function CreateListingPage() {
       toast.error('An unexpected error occurred')
     } finally {
       setIsSubmitting(false)
+    }
+  }
+
+  const handleContinueToSuccess = () => {
+    if (submittedListingId) {
+      router.push(`/listings/success?id=${submittedListingId}`)
     }
   }
 
@@ -680,7 +688,7 @@ export default function CreateListingPage() {
               type="button"
               variant="outline"
               onClick={handleBack}
-              disabled={currentStep === 1 || isSubmitting}
+              disabled={currentStep === 1 || isSubmitting || !!submittedListingId}
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back
@@ -689,6 +697,11 @@ export default function CreateListingPage() {
             {currentStep < STEPS.length ? (
               <Button type="button" onClick={handleNext}>
                 Next
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+            ) : submittedListingId ? (
+              <Button type="button" onClick={handleContinueToSuccess}>
+                Continue
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             ) : (

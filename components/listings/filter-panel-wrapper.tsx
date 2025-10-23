@@ -86,7 +86,12 @@ export const FilterPanelWrapper = () => {
     // Update URL without page reload
     const queryString = params.toString()
     const newUrl = queryString ? `/listings?${queryString}` : '/listings'
-    router.push(newUrl, { scroll: false })
+
+    // Only push if URL actually changed to prevent infinite loop
+    const currentUrl = `/listings${searchParams.toString() ? `?${searchParams.toString()}` : ''}`
+    if (newUrl !== currentUrl) {
+      router.push(newUrl, { scroll: false })
+    }
   }, [filters, router, searchParams])
 
   const handleFiltersChange = React.useCallback((newFilters: FilterState) => {
