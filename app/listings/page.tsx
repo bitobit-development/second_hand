@@ -12,10 +12,10 @@ import type { ListingCategory, ListingCondition, PricingType } from '@prisma/cli
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Browse Listings | Second-Hand Marketplace',
+  title: 'Browse Listings | LOTOSALE',
   description: 'Browse thousands of quality pre-owned items from trusted sellers across South Africa.',
   openGraph: {
-    title: 'Browse Listings | Second-Hand Marketplace',
+    title: 'Browse Listings | LOTOSALE',
     description: 'Browse thousands of quality pre-owned items from trusted sellers across South Africa.',
   },
 }

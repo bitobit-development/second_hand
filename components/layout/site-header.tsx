@@ -29,8 +29,8 @@ export function SiteHeader() {
             aria-label="Home"
           >
             <Package className="w-6 h-6 text-primary" aria-hidden="true" />
-            <span className="hidden sm:inline">Second-Hand Market</span>
-            <span className="sm:hidden">SHM</span>
+            <span className="hidden sm:inline">LOTOSALE</span>
+            <span className="sm:hidden">LOTOSALE</span>
           </Link>
 
           {/* Desktop Navigation */}

@@ -18,7 +18,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Second-Hand Marketplace - Buy and Sell Pre-Owned Items",
+  title: "LOTOSALE - Buy and Sell Pre-Owned Items",
   description: "South African marketplace for buying and selling pre-owned items with secure transactions and community ratings",
 };
 

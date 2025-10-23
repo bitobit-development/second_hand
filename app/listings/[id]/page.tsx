@@ -43,7 +43,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const priceText = price ? formatZAR(price) : 'Offers Accepted'
 
   return {
-    title: `${listing.title} - ${priceText} | Second-Hand Marketplace`,
+    title: `${listing.title} - ${priceText} | LOTOSALE`,
     description: listing.description.substring(0, 160),
     openGraph: {
       title: listing.title,

@@ -54,7 +54,7 @@ export const sendResetEmail = async (
     try {
       await sendEmail({
         to: user.email,
-        subject: "Reset Your Password - Second-Hand Marketplace",
+        subject: "Reset Your Password - LOTOSALE",
         html: getPasswordResetEmailHtml(resetUrl, user.name),
       });
     } catch (emailError) {

@@ -44,7 +44,7 @@ export function getVerificationEmailHtml(
       <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
         <h1 style="color: #333;">Verify Your Email</h1>
         <p>Hi ${name},</p>
-        <p>Thank you for registering with Second-Hand Marketplace. Please verify your email address by clicking the button below:</p>
+        <p>Thank you for registering with LOTOSALE. Please verify your email address by clicking the button below:</p>
         <a href="${verificationUrl}" style="display: inline-block; padding: 12px 24px; margin: 20px 0; background-color: #3b82f6; color: white; text-decoration: none; border-radius: 6px;">
           Verify Email
         </a>
@@ -53,7 +53,7 @@ export function getVerificationEmailHtml(
         <p>This link will expire in 24 hours.</p>
         <p>If you didn't create an account, you can safely ignore this email.</p>
         <hr style="margin: 30px 0; border: none; border-top: 1px solid #ddd;">
-        <p style="color: #999; font-size: 12px;">Second-Hand Marketplace</p>
+        <p style="color: #999; font-size: 12px;">LOTOSALE</p>
       </body>
     </html>
   `;
@@ -83,7 +83,7 @@ export function getPasswordResetEmailHtml(
         <p>This link will expire in 1 hour.</p>
         <p>If you didn't request a password reset, you can safely ignore this email.</p>
         <hr style="margin: 30px 0; border: none; border-top: 1px solid #ddd;">
-        <p style="color: #999; font-size: 12px;">Second-Hand Marketplace</p>
+        <p style="color: #999; font-size: 12px;">LOTOSALE</p>
       </body>
     </html>
   `;

@@ -61,7 +61,7 @@ export const registerUser = async (
     try {
       await sendEmail({
         to: user.email,
-        subject: "Verify Your Email - Second-Hand Marketplace",
+        subject: "Verify Your Email - LOTOSALE",
         html: getVerificationEmailHtml(verificationUrl, user.name),
       });
     } catch (emailError) {

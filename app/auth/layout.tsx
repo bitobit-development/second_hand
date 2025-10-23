@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Authentication - Second-Hand Marketplace",
-  description: "Sign in or create an account for Second-Hand Marketplace",
+  title: "Authentication - LOTOSALE",
+  description: "Sign in or create an account for LOTOSALE",
 };
 
 export default function AuthLayout({
@@ -20,8 +20,7 @@ export default function AuthLayout({
             href="/"
             className="flex items-center justify-center gap-2 text-2xl font-bold text-gray-900 dark:text-white"
           >
-            <span className="text-blue-600 dark:text-blue-400">Second-Hand</span>
-            <span>Marketplace</span>
+            <span className="text-blue-600 dark:text-blue-400">LOTOSALE</span>
           </Link>
         </div>
       </header>
@@ -38,8 +37,7 @@ export default function AuthLayout({
       {/* Footer */}
       <footer className="py-4 px-4 text-center text-sm text-gray-600 dark:text-gray-400">
         <p>
-          &copy; {new Date().getFullYear()} Second-Hand Marketplace. All rights
-          reserved.
+          &copy; {new Date().getFullYear()} LOTOSALE. All rights reserved.
         </p>
       </footer>
     </div>
