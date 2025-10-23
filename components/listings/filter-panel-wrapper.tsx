@@ -3,7 +3,7 @@
 import * as React from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { FilterPanel, type FilterState } from './filter-panel'
-import type { ListingCategory, ListingCondition, PricingType } from '@/lib/generated/prisma'
+import type { ListingCategory, ListingCondition, PricingType } from '@prisma/client'
 
 export const FilterPanelWrapper = () => {
   const router = useRouter()

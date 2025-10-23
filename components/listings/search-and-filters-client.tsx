@@ -4,7 +4,7 @@ import * as React from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { SearchBar } from './search-bar'
 import { FilterPanel, type FilterState } from './filter-panel'
-import type { ListingCategory, ListingCondition, PricingType } from '@/lib/generated/prisma'
+import type { ListingCategory, ListingCondition, PricingType } from '@prisma/client'
 
 /**
  * Client-side wrapper for SearchBar and FilterPanel

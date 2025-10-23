@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { ListingCategory, ListingCondition, PricingType } from '@/lib/generated/prisma'
+import { ListingCategory, ListingCondition, PricingType } from '@prisma/client'
 import { SA_PROVINCES } from '@/lib/constants/categories'
 
 // Step 1: Category Selection

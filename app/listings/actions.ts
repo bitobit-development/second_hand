@@ -2,13 +2,13 @@
 
 import { prisma } from "@/lib/prisma";
 import { cache } from "react";
-import { Prisma } from "@/lib/generated/prisma";
+import { Prisma } from "@prisma/client";
 import {
   ListingCategory,
   ListingCondition,
   ListingStatus,
   PricingType,
-} from "@/lib/generated/prisma";
+} from "@prisma/client";
 
 // ============================================================================
 // TYPES & SCHEMAS

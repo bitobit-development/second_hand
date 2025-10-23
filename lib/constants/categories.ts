@@ -1,4 +1,4 @@
-import { ListingCategory, ListingCondition } from '@/lib/generated/prisma'
+import { ListingCategory, ListingCondition } from '@prisma/client'
 import { LucideIcon } from 'lucide-react'
 
 export type CategoryConfig = {

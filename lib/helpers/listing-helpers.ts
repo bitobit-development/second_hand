@@ -3,7 +3,7 @@
  * Utilities for working with listing data on the frontend
  */
 
-import { Decimal } from '@/lib/generated/prisma/runtime/library'
+import { Decimal } from '@prisma/client/runtime/library'
 
 /**
  * Convert Prisma Decimal to string for JSON serialization

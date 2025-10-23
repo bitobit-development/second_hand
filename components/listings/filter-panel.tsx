@@ -11,7 +11,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
 import { CATEGORIES, CONDITIONS, SA_PROVINCES, formatZAR } from '@/lib/constants/categories'
-import type { ListingCategory, ListingCondition, PricingType } from '@/lib/generated/prisma'
+import type { ListingCategory, ListingCondition, PricingType } from '@prisma/client'
 
 export interface FilterState {
   categories: ListingCategory[]

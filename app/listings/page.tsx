@@ -8,7 +8,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { getListings, type GetListingsParams } from './actions'
 import { deserializeDecimal, parseSortOption, parseNumberParam } from '@/lib/helpers/listing-helpers'
-import type { ListingCategory, ListingCondition, PricingType } from '@/lib/generated/prisma'
+import type { ListingCategory, ListingCondition, PricingType } from '@prisma/client'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {

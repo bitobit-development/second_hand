@@ -8,7 +8,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { formatZAR } from '@/lib/constants/categories'
-import type { ListingCondition, PricingType } from '@/lib/generated/prisma'
+import type { ListingCondition, PricingType } from '@prisma/client'
 
 export interface ListingCardProps {
   id: string

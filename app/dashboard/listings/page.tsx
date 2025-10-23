@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { getCategoryConfig, getConditionConfig, formatZAR } from '@/lib/constants/categories'
 import { deleteListing, pauseListing, resumeListing } from '@/app/listings/create/actions'
-import { ListingStatus } from '@/lib/generated/prisma'
+import { ListingStatus } from '@prisma/client'
 import { serializeDecimal } from '@/lib/helpers/listing-helpers'
 
 type ListingCardProps = {

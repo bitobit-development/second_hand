@@ -11,7 +11,7 @@
  * - Leverage indexed fields for filtering
  */
 
-import { Prisma } from '@/lib/generated/prisma';
+import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 
 // ============================================================================

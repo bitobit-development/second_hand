@@ -12,7 +12,7 @@ import {
   calculateCommission,
   calculateNetAmount,
 } from '@/lib/constants/categories'
-import { ListingCategory, ListingCondition, PricingType } from '@/lib/generated/prisma'
+import { ListingCategory, ListingCondition, PricingType } from '@prisma/client'
 import { cn } from '@/lib/utils'
 
 type ListingPreviewData = {
