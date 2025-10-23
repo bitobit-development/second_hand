@@ -10,16 +10,19 @@ The project follows the Next.js App Router architecture with React Server Compon
 
 ## Development Commands
 
-- **Start dev server**: `npm run dev` (runs on port 3000)
-  - If port 3000 is in use: `npx kill-port 3000 && npm run dev`
-- **Build production**: `npm run build`
-- **Start production server**: `npm start`
-- **Lint**: `npm run lint` (uses ESLint with Next.js config)
-- **Test**: `npm test` (run all tests)
-- **Test watch mode**: `npm run test:watch` (re-run on file changes)
-- **Test coverage**: `npm run test:coverage` (generate coverage report)
+**Package Manager**: This project uses **pnpm** (not npm). Always use `pnpm` commands.
+
+- **Start dev server**: `pnpm dev` (runs on port 3000)
+  - If port 3000 is in use: `npx kill-port 3000 && pnpm dev`
+- **Build production**: `pnpm build`
+- **Start production server**: `pnpm start`
+- **Lint**: `pnpm lint` (uses ESLint with Next.js config)
+- **Install dependencies**: `pnpm install` (regenerates pnpm-lock.yaml)
+- **Test**: `pnpm test` (run all tests)
+- **Test watch mode**: `pnpm test:watch` (re-run on file changes)
+- **Test coverage**: `pnpm test:coverage` (generate coverage report)
 - **Database commands**:
-  - Generate Prisma client: `npx prisma generate`
+  - Generate Prisma client: `npx prisma generate` (auto-runs via postinstall hook)
   - Create migration: `npx prisma migrate dev --name migration_name`
   - Apply migrations: `npx prisma migrate deploy`
   - Push schema changes (dev only): `npx prisma db push`
@@ -49,7 +52,7 @@ The project follows the Next.js App Router architecture with React Server Compon
   - `prisma.ts` - Singleton Prisma client instance
   - `auth-helpers.ts` - Authentication utilities
   - `validations/` - Zod schemas for forms
-  - `generated/prisma/` - Generated Prisma client (DO NOT EDIT)
+  - `helpers/` - Helper functions (e.g., `listing-helpers.ts` for Decimal serialization)
 - `prisma/` - Database schema and migrations
   - `schema.prisma` - Database models and enums
   - `migrations/` - Migration history
@@ -83,7 +86,7 @@ The project follows the Next.js App Router architecture with React Server Compon
 The project uses `@/*` path alias mapping to root directory:
 - `@/components` → components directory
 - `@/lib/utils` → lib/utils.ts
-- `@/lib/generated/prisma` → Prisma client (auto-generated)
+- `@prisma/client` → Prisma client (auto-generated in node_modules)
 - `@/components/ui` → shadcn/ui components
 - `@/hooks` → custom React hooks
 
@@ -113,10 +116,12 @@ The project uses `@/*` path alias mapping to root directory:
   ```
 
 **Prisma Client Usage**
-- ALWAYS import from `@/lib/prisma` (singleton instance)
+- ALWAYS import from `@/lib/prisma` for the singleton client instance
 - NEVER instantiate `new PrismaClient()` directly
-- Custom output path: `lib/generated/prisma`
+- Import types from `@prisma/client` (e.g., `import { Prisma, ListingStatus } from '@prisma/client'`)
+- Prisma client generates to `node_modules/@prisma/client` (default location)
 - After schema changes: `npx prisma generate && npx prisma db push`
+- The `postinstall` script automatically runs `prisma generate` after dependency installation
 
 **Image Handling**
 - Images uploaded to Cloudinary via `lib/cloudinary.ts`
@@ -322,9 +327,10 @@ export default function Page() {
 
 **Database: Neon (Serverless PostgreSQL)**
 - Connection string in `.env` as `DATABASE_URL`
-- Prisma ORM with custom output path: `lib/generated/prisma`
+- Prisma ORM with default client location (`node_modules/@prisma/client`)
 - Migrations stored in `prisma/migrations/`
 - Seed script: `scripts/seed-neon.ts`
+- The `postinstall` hook ensures Prisma client is generated after `pnpm install`
 
 **Authentication: NextAuth.js v5**
 - Configuration split: `auth.ts` (runtime) + `auth.config.ts` (edge-compatible)
@@ -437,6 +443,20 @@ OPENAI_API_KEY            # OpenAI API key for GPT-4o Vision (AI description gen
 - Test files in `__tests__/` directory
 - Mock utilities for Next.js router and NextAuth
 - Run tests before pushing changes
+
+**Zod Validation Error Handling**
+- ALWAYS use `.issues` (not `.errors`) when accessing Zod validation errors
+- Correct pattern: `zodError.issues[0]?.message`
+- Incorrect pattern: `zodError.errors[0]?.message` (will cause TypeScript errors)
+- This applies to all server actions that parse form data with Zod schemas
+
+**Vercel Deployment**
+- Project uses pnpm as package manager (specified in package.json)
+- `pnpm-lock.yaml` must be committed and kept in sync with `package.json`
+- `postinstall` script runs `prisma generate` automatically during build
+- Prisma client generates to default `node_modules/@prisma/client` location
+- Required environment variables for production (see Environment Variables section)
+- Production domain: `second-hand-xi.vercel.app` (set in `NEXTAUTH_URL` and `NEXT_PUBLIC_APP_URL`)
 
 # important-instruction-reminders
 Do what has been asked; nothing more, nothing less.
