@@ -136,7 +136,7 @@ export const ImageUpload = ({
     [imageFiles, maxImages, maxSizeInMB, onChange, primaryImage]
   )
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+  const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
     onDrop,
     accept: {
       'image/jpeg': ['.jpg', '.jpeg'],
@@ -147,6 +147,7 @@ export const ImageUpload = ({
     disabled: imageFiles.length >= maxImages,
     onDragEnter: () => setIsDragging(true),
     onDragLeave: () => setIsDragging(false),
+    noClick: true, // Disable default click behavior
   })
 
   const removeImage = (index: number) => {
@@ -200,10 +201,10 @@ export const ImageUpload = ({
         <div
           {...getRootProps()}
           className={cn(
-            'border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors',
+            'border-2 border-dashed rounded-lg p-8 text-center transition-colors',
             isDragActive || isDragging
               ? 'border-primary bg-primary/5'
-              : 'border-muted-foreground/25 hover:border-muted-foreground/50',
+              : 'border-muted-foreground/25',
             imageFiles.length >= maxImages && 'opacity-50 cursor-not-allowed'
           )}
         >
@@ -215,8 +216,20 @@ export const ImageUpload = ({
               : 'Drag and drop images here'}
           </p>
           <p className="text-xs text-muted-foreground mb-4">
-            or click to browse
+            or
           </p>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={(e) => {
+              e.stopPropagation()
+              open()
+            }}
+            disabled={imageFiles.length >= maxImages}
+            className="mb-4"
+          >
+            Browse Files
+          </Button>
           <p className="text-xs text-muted-foreground">
             JPEG, PNG, WebP • Max {maxSizeInMB}MB per file • Up to {maxImages} images
           </p>
