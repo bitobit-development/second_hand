@@ -34,7 +34,6 @@ const config: Config = {
     '!**/node_modules/**',
     '!**/.next/**',
     '!**/coverage/**',
-    '!**/lib/generated/**',
     '!**/*.test.{ts,tsx}',
     '!**/*.config.{ts,tsx}',
   ],

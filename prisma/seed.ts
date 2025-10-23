@@ -10,7 +10,7 @@
  * Usage: npx prisma db seed
  */
 
-import { PrismaClient } from '../lib/generated/prisma';
+import { PrismaClient } from '@prisma/client';
 import { hash } from 'bcryptjs';
 
 const prisma = new PrismaClient();
