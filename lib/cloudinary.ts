@@ -70,7 +70,8 @@ export async function uploadImage(
           fetch_format: "auto",
         },
       ],
-      eager_async: false, // Wait for eager transformations to complete
+      eager_async: true, // Don't wait for eager transformations (faster upload)
+      timeout: 60000, // 60 second timeout
     });
 
     return {
@@ -83,6 +84,11 @@ export async function uploadImage(
     };
   } catch (error) {
     console.error("Cloudinary upload error:", error);
+    // Log more details for debugging
+    if (error instanceof Error) {
+      console.error("Error message:", error.message);
+      console.error("Error stack:", error.stack);
+    }
     throw new Error("Failed to upload image");
   }
 }
