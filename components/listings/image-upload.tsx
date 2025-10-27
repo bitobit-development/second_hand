@@ -144,7 +144,7 @@ export const ImageUpload = ({
     [imageFiles, maxImages, maxSizeInMB, onChange, primaryImage]
   )
 
-  const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
+  const { getRootProps, getInputProps, isDragActive, open, inputRef } = useDropzone({
     onDrop,
     accept: {
       'image/jpeg': ['.jpg', '.jpeg'],
@@ -157,7 +157,7 @@ export const ImageUpload = ({
     disabled: imageFiles.length >= maxImages,
     onDragEnter: () => setIsDragging(true),
     onDragLeave: () => setIsDragging(false),
-    noClick: true, // Disable default click behavior
+    noClick: true, // Disable default click behavior on dropzone
     noKeyboard: true, // Disable keyboard interactions on dropzone
     noDrag: false, // Keep drag-and-drop enabled
   })
@@ -220,8 +220,21 @@ export const ImageUpload = ({
             imageFiles.length >= maxImages && 'opacity-50 cursor-not-allowed'
           )}
         >
-          {/* Hidden file input - only rendered when needed */}
-          <input {...getInputProps()} style={{ display: 'none' }} />
+          {/* Hidden file input - visually hidden but accessible */}
+          <input
+            {...getInputProps()}
+            style={{
+              position: 'absolute',
+              width: '1px',
+              height: '1px',
+              padding: 0,
+              margin: '-1px',
+              overflow: 'hidden',
+              clip: 'rect(0,0,0,0)',
+              whiteSpace: 'nowrap',
+              border: 0,
+            }}
+          />
           <Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
           <p className="text-sm font-medium mb-1">
             {isDragActive || isDragging
@@ -237,7 +250,8 @@ export const ImageUpload = ({
             onClick={(e) => {
               e.stopPropagation()
               e.preventDefault()
-              open()
+              // Directly trigger the file input click for better browser compatibility
+              inputRef.current?.click()
             }}
             disabled={imageFiles.length >= maxImages}
             className="mb-4"
