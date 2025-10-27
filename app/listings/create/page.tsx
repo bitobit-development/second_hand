@@ -46,7 +46,8 @@ export default function CreateListingPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [aiEnhancedImages, setAiEnhancedImages] = useState(false)
   const [aiGeneratedDesc, setAiGeneratedDesc] = useState(false)
-  const [originalImages, setOriginalImages] = useState<string[]>([])
+  // Map enhanced URLs to original URLs for AI analysis
+  const [imageMapping, setImageMapping] = useState<Record<string, string>>({})
   const [submittedListingId, setSubmittedListingId] = useState<string | null>(null)
 
   const form = useForm<CreateListingFormData>({
@@ -72,6 +73,15 @@ export default function CreateListingPage() {
   const watchPricingType = watch('pricingType')
 
   const progress = (currentStep / STEPS.length) * 100
+
+  /**
+   * Get original image URLs for AI analysis
+   * If an image has been enhanced, return the original URL
+   * Otherwise, return the current URL
+   */
+  const getOriginalImages = (currentImages: string[]): string[] => {
+    return currentImages.map((url) => imageMapping[url] || url)
+  }
 
   const validateStep = async (step: number): Promise<boolean> => {
     switch (step) {
@@ -122,11 +132,13 @@ export default function CreateListingPage() {
 
     try {
       // Include AI metadata in submission
+      // Convert imageMapping to originalImages array for backward compatibility
+      const originalImagesList = Object.values(imageMapping)
       const result = await createListing({
         ...data,
         aiEnhancedImages,
         aiGeneratedDesc,
-        originalImages,
+        originalImages: originalImagesList,
       } as any)
 
       if (result.success && result.data) {
@@ -255,12 +267,13 @@ export default function CreateListingPage() {
                               const imageIndex = currentImages.indexOf(originalUrl)
 
                               if (imageIndex !== -1) {
-                                // Store original if not already stored
-                                if (!originalImages.includes(originalUrl)) {
-                                  setOriginalImages([...originalImages, originalUrl])
-                                }
+                                // Store mapping of enhanced URL -> original URL for AI analysis
+                                setImageMapping((prev) => ({
+                                  ...prev,
+                                  [enhancedUrl]: originalUrl,
+                                }))
 
-                                // Replace with enhanced version
+                                // Replace with enhanced version in form
                                 const newImages = [...currentImages]
                                 newImages[imageIndex] = enhancedUrl
                                 setValue('images', newImages)
@@ -303,7 +316,7 @@ export default function CreateListingPage() {
               </CardHeader>
               <CardContent>
                 <AICategoryStep
-                  imageUrls={watchAllFields.images || []}
+                  imageUrls={getOriginalImages(watchAllFields.images || [])}
                   selectedCategory={watchAllFields.category}
                   onCategorySelect={(category) => setValue('category', category)}
                   onError={(error) => {
@@ -328,7 +341,7 @@ export default function CreateListingPage() {
                 {/* AI Description Generator with Title - shown if images uploaded */}
                 {watchAllFields.images && watchAllFields.images.length > 0 && watchAllFields.category && (
                   <AIDescriptionGenerator
-                    imageUrls={watchAllFields.images}
+                    imageUrls={getOriginalImages(watchAllFields.images)}
                     category={watchAllFields.category}
                     onGenerated={(description) => {
                       setValue('description', description)
