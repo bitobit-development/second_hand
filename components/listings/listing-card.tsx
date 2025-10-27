@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { formatZAR } from '@/lib/constants/categories'
+import { getSquareUrl } from '@/lib/cloudinary-utils'
 import type { ListingCondition, PricingType } from '@prisma/client'
 
 export interface ListingCardProps {
@@ -57,6 +58,9 @@ export const ListingCard = ({
 }: ListingCardProps) => {
   const showNewBadge = isNewListing(createdAt)
 
+  // Use AI-cropped square version for perfect 1:1 display
+  const squareImageUrl = getSquareUrl(primaryImage)
+
   return (
     <Link
       href={`/listings/${id}`}
@@ -76,7 +80,7 @@ export const ListingCard = ({
         {/* Image Container */}
         <div className="relative aspect-square w-full overflow-hidden bg-muted">
           <Image
-            src={primaryImage}
+            src={squareImageUrl}
             alt={title}
             fill
             className="object-cover transition-transform duration-300 group-hover:scale-110"

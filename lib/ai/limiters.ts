@@ -60,6 +60,32 @@ export const descriptionGenerationLimiter = new RateLimiter({
 });
 
 /**
+ * Rate limiter for category suggestion API
+ *
+ * Limits:
+ * - 10 requests per minute
+ * - 100 requests per hour
+ *
+ * Usage in API route:
+ * ```ts
+ * import { categorySuggestionLimiter } from '@/lib/ai/limiters';
+ * import { withRateLimit } from '@/lib/ai/middleware';
+ *
+ * export async function POST(req: Request) {
+ *   return withRateLimit(req, categorySuggestionLimiter, async (userId) => {
+ *     // Your category suggestion logic here
+ *     const result = await suggestCategories(params);
+ *     return Response.json(result);
+ *   });
+ * }
+ * ```
+ */
+export const categorySuggestionLimiter = new RateLimiter({
+  requestsPerMinute: 10,
+  requestsPerHour: 100,
+});
+
+/**
  * Custom rate limiter factory
  *
  * Create a custom rate limiter with specific limits.

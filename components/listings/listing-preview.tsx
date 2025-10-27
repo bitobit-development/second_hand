@@ -57,12 +57,12 @@ export const ListingPreview = ({ data, onEdit }: ListingPreviewProps) => {
           {/* Image Gallery */}
           <div className="space-y-4 mb-6">
             {/* Main Image */}
-            <div className="relative aspect-video md:aspect-[4/3] rounded-lg overflow-hidden bg-muted">
+            <div className="relative aspect-[3/4] sm:aspect-square md:aspect-[4/3] rounded-lg overflow-hidden bg-muted">
               {currentImage ? (
                 <img
                   src={currentImage}
                   alt={data.title}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-contain"
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-muted-foreground">

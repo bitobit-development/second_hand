@@ -25,7 +25,11 @@ export const authConfig = {
 
       // Redirect logged-in users away from auth pages
       if (isLoggedIn && isOnAuthPage) {
-        return Response.redirect(new URL("/dashboard", nextUrl));
+        // Check if user has ADMIN role and redirect to admin panel
+        // Role is available in JWT token (session.user.role)
+        const userRole = (auth?.user as any)?.role;
+        const redirectUrl = userRole === 'ADMIN' ? '/admin' : '/dashboard';
+        return Response.redirect(new URL(redirectUrl, nextUrl));
       }
 
       // Protect dashboard, account, and sell pages
@@ -34,10 +38,22 @@ export const authConfig = {
         return false; // Redirect unauthenticated users to login page
       }
 
-      // Protect admin pages
+      // Admin routes use two-layer security:
+      // 1. Middleware: Check authentication only (edge-compatible)
+      // 2. Page level: Check ADMIN role via requireAdmin() (uses database)
+      // This allows middleware to be edge-compatible while role checks use database
       if (isOnAdmin) {
-        if (isLoggedIn && auth.user.role === "ADMIN") return true;
-        return false;
+        if (!isLoggedIn) {
+          // Redirect to login with callback URL
+          const callbackUrl = encodeURIComponent(
+            nextUrl.pathname + nextUrl.search
+          );
+          return Response.redirect(
+            new URL(`/auth/login?callbackUrl=${callbackUrl}`, nextUrl)
+          );
+        }
+        // Admin role check happens at page level via requireAdmin()
+        return true;
       }
 
       return true;

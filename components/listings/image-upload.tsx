@@ -8,7 +8,10 @@ import { Progress } from '@/components/ui/progress'
 import { cn } from '@/lib/utils'
 
 type ImageFile = {
-  url: string
+  url: string                 // Original URL for backward compatibility
+  squareUrl?: string          // 1000x1000 AI-cropped for listing cards
+  portraitUrl?: string        // 750x1000 AI-cropped for upload preview
+  thumbnailUrl?: string       // 400x400 AI-cropped for thumbnails
   file?: File
   uploading?: boolean
   progress?: number
@@ -54,7 +57,7 @@ export const ImageUpload = ({
     }
   }, [imageFiles])
 
-  const uploadToCloudinary = async (file: File): Promise<string> => {
+  const uploadToCloudinary = async (file: File): Promise<ImageFile> => {
     const formData = new FormData()
     formData.append('file', file)
 
@@ -69,7 +72,12 @@ export const ImageUpload = ({
     }
 
     const data = await response.json()
-    return data.url
+    return {
+      url: data.url,
+      squareUrl: data.squareUrl,
+      portraitUrl: data.portraitUrl,
+      thumbnailUrl: data.thumbnailUrl,
+    }
   }
 
   const onDrop = useCallback(
@@ -109,12 +117,12 @@ export const ImageUpload = ({
         const currentIndex = imageFiles.length + i
 
         try {
-          const uploadedUrl = await uploadToCloudinary(file)
+          const uploadedImage = await uploadToCloudinary(file)
 
           setImageFiles((prev) => {
             const updated = [...prev]
             updated[currentIndex] = {
-              url: uploadedUrl,
+              ...uploadedImage,
               uploading: false,
             }
             return updated
@@ -144,10 +152,14 @@ export const ImageUpload = ({
       'image/webp': ['.webp'],
     },
     maxSize: maxSizeInMB * 1024 * 1024,
+    maxFiles: maxImages - imageFiles.length, // Limit to remaining slots
+    multiple: true, // Allow multiple file selection
     disabled: imageFiles.length >= maxImages,
     onDragEnter: () => setIsDragging(true),
     onDragLeave: () => setIsDragging(false),
     noClick: true, // Disable default click behavior
+    noKeyboard: true, // Disable keyboard interactions on dropzone
+    noDrag: false, // Keep drag-and-drop enabled
   })
 
   const removeImage = (index: number) => {
@@ -208,7 +220,8 @@ export const ImageUpload = ({
             imageFiles.length >= maxImages && 'opacity-50 cursor-not-allowed'
           )}
         >
-          <input {...getInputProps()} />
+          {/* Hidden file input - only rendered when needed */}
+          <input {...getInputProps()} style={{ display: 'none' }} />
           <Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
           <p className="text-sm font-medium mb-1">
             {isDragActive || isDragging
@@ -223,6 +236,7 @@ export const ImageUpload = ({
             variant="outline"
             onClick={(e) => {
               e.stopPropagation()
+              e.preventDefault()
               open()
             }}
             disabled={imageFiles.length >= maxImages}
@@ -246,16 +260,16 @@ export const ImageUpload = ({
             <div
               key={imageFile.url}
               className={cn(
-                'relative aspect-square rounded-lg overflow-hidden border-2 transition-all',
+                'relative aspect-[3/4] rounded-lg overflow-hidden border-2 transition-all',
                 primaryImage === imageFile.url
                   ? 'border-primary ring-2 ring-primary ring-offset-2'
                   : 'border-muted-foreground/25'
               )}
             >
               <img
-                src={imageFile.url}
+                src={imageFile.portraitUrl || imageFile.url}
                 alt={`Upload ${index + 1}`}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain bg-muted"
               />
 
               {/* Loading Overlay */}

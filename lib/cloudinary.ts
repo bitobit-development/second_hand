@@ -13,6 +13,12 @@ export interface UploadResult {
   width: number;
   height: number;
   format: string;
+  eager?: Array<{
+    secure_url: string;
+    width: number;
+    height: number;
+    format: string;
+  }>;
 }
 
 /**
@@ -28,11 +34,43 @@ export async function uploadImage(
   try {
     const result = await cloudinary.uploader.upload(file, {
       folder: `second-hand/${folder}`,
+      // Primary transformation - keep original with size limit
       transformation: [
         { width: 1200, height: 1200, crop: "limit" },
         { quality: "auto:good" },
         { fetch_format: "auto" },
       ],
+      // Eager transformations - pre-generate AI-cropped versions
+      eager: [
+        // Square (1:1) - for listing cards
+        {
+          width: 1000,
+          height: 1000,
+          crop: "fill",
+          gravity: "auto",
+          quality: "auto:good",
+          fetch_format: "auto",
+        },
+        // Portrait (3:4) - for upload preview
+        {
+          width: 750,
+          height: 1000,
+          crop: "fill",
+          gravity: "auto",
+          quality: "auto:good",
+          fetch_format: "auto",
+        },
+        // Thumbnail (1:1 small) - for admin/quick preview
+        {
+          width: 400,
+          height: 400,
+          crop: "fill",
+          gravity: "auto",
+          quality: "auto:good",
+          fetch_format: "auto",
+        },
+      ],
+      eager_async: false, // Wait for eager transformations to complete
     });
 
     return {
@@ -41,6 +79,7 @@ export async function uploadImage(
       width: result.width,
       height: result.height,
       format: result.format,
+      eager: result.eager,
     };
   } catch (error) {
     console.error("Cloudinary upload error:", error);

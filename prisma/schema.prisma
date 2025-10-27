@@ -71,6 +71,43 @@ enum OfferStatus {
   COUNTERED
 }
 
+enum AdminAction {
+  // Listing actions
+  APPROVE_LISTING
+  REJECT_LISTING
+  PAUSE_LISTING
+  RESTORE_LISTING
+  DELETE_LISTING
+
+  // User actions
+  CREATE_USER
+  UPDATE_USER
+  DELETE_USER
+  UPDATE_USER_ROLE
+  BAN_USER
+  UNBAN_USER
+
+  // Category actions
+  CREATE_CATEGORY
+  UPDATE_CATEGORY
+  MERGE_CATEGORIES
+  DELETE_CATEGORY
+  TOGGLE_CATEGORY_STATUS
+
+  // System actions
+  UPDATE_SETTINGS
+  VIEW_AUDIT_LOG
+  EXPORT_DATA
+}
+
+enum AuditTargetType {
+  LISTING
+  USER
+  CATEGORY
+  TRANSACTION
+  SYSTEM
+}
+
 // ============================================================================
 // MODELS
 // ============================================================================
@@ -102,6 +139,7 @@ model User {
   givenReviews         Review[]             @relation("UserGivenReviews")
   verificationTokens   VerificationToken[]
   passwordResetTokens  PasswordResetToken[]
+  adminAuditLogs       AdminAuditLog[]
 
   // Indexes for performance
   @@index([email])
@@ -114,6 +152,7 @@ model Listing {
   title           String
   description     String
   category        ListingCategory
+  categoryId      String?
   condition       ListingCondition
   images          String[]
   primaryImage    String
@@ -134,9 +173,10 @@ model Listing {
   soldAt          DateTime?
 
   // Relations
-  seller      User         @relation(fields: [sellerId], references: [id])
-  transaction Transaction?
-  offers      Offer[]
+  seller       User         @relation(fields: [sellerId], references: [id])
+  categoryRel  Category?    @relation(fields: [categoryId], references: [id])
+  transaction  Transaction?
+  offers       Offer[]
 
   // Indexes for optimal query performance
   @@index([sellerId])
@@ -253,4 +293,54 @@ model PasswordResetToken {
   @@index([userId])
   @@index([token])
   @@index([expiresAt])
+}
+
+model Category {
+  id          String    @id @default(uuid())
+  name        String
+  slug        String    @unique
+  parentId    String?
+  icon        String
+  description String
+  isActive    Boolean   @default(true)
+  itemCount   Int       @default(0)
+  aiGenerated Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  parent      Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: Restrict)
+  children    Category[] @relation("CategoryHierarchy")
+  listings    Listing[]
+
+  // Indexes
+  @@index([slug])
+  @@index([parentId])
+  @@index([isActive])
+  @@index([aiGenerated])
+  @@index([itemCount])
+}
+
+model AdminAuditLog {
+  id         String          @id @default(uuid())
+  userId     String
+  action     AdminAction
+  targetType AuditTargetType
+  targetId   String
+  details    Json?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime        @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Indexes
+  @@index([userId])
+  @@index([action])
+  @@index([targetType])
+  @@index([targetId])
+  @@index([createdAt])
+  @@index([userId, action])
+  @@index([targetType, targetId])
 }

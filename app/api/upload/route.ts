@@ -40,11 +40,19 @@ export async function POST(request: NextRequest) {
     const buffer = Buffer.from(bytes);
     const base64 = `data:${file.type};base64,${buffer.toString("base64")}`;
 
-    // Upload to Cloudinary
+    // Upload to Cloudinary with eager transformations
     const result = await uploadImage(base64, "listings");
 
+    // Extract eager transformation URLs
+    const squareUrl = result.eager?.[0]?.secure_url || result.secure_url;
+    const portraitUrl = result.eager?.[1]?.secure_url || result.secure_url;
+    const thumbnailUrl = result.eager?.[2]?.secure_url || result.secure_url;
+
     return NextResponse.json({
-      url: result.secure_url,
+      url: result.secure_url,           // Original
+      squareUrl,                         // 1000x1000 AI-cropped
+      portraitUrl,                       // 750x1000 AI-cropped
+      thumbnailUrl,                      // 400x400 AI-cropped
       publicId: result.public_id,
       width: result.width,
       height: result.height,

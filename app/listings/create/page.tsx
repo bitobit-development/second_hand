@@ -17,6 +17,7 @@ import { ImageUpload } from '@/components/listings/image-upload'
 import { ListingPreview } from '@/components/listings/listing-preview'
 import { AIImageEnhancer } from '@/components/listings/ai-image-enhancer'
 import { AIDescriptionGenerator } from '@/components/listings/ai-description-generator'
+import { AICategoryStep } from '@/components/listings/ai-category-step'
 import { createListing } from './actions'
 import {
   createListingSchema,
@@ -31,8 +32,8 @@ import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 
 const STEPS = [
-  { id: 1, name: 'Category', description: 'Choose a category' },
-  { id: 2, name: 'Images', description: 'Add photos' },
+  { id: 1, name: 'Images', description: 'Add photos of your item' },
+  { id: 2, name: 'Category', description: 'AI-powered categorization' },
   { id: 3, name: 'Details', description: 'Describe your item' },
   { id: 4, name: 'Pricing', description: 'Set your price' },
   { id: 5, name: 'Location', description: 'Where is it?' },
@@ -75,14 +76,19 @@ export default function CreateListingPage() {
   const validateStep = async (step: number): Promise<boolean> => {
     switch (step) {
       case 1:
-        return await trigger('category')
-      case 2:
+        // Step 1: Images
         return await trigger(['images', 'primaryImage'])
+      case 2:
+        // Step 2: Category
+        return await trigger('category')
       case 3:
+        // Step 3: Details
         return await trigger(['title', 'description', 'condition'])
       case 4:
+        // Step 4: Pricing
         return await trigger(['pricingType', 'price', 'minOffer'])
       case 5:
+        // Step 5: Location
         return await trigger(['city', 'province'])
       default:
         return true
@@ -102,8 +108,8 @@ export default function CreateListingPage() {
 
   const handleEditSection = (section: string) => {
     const stepMap: Record<string, number> = {
-      category: 1,
-      images: 2,
+      images: 1,
+      category: 2,
       details: 3,
       pricing: 4,
       location: 5,
@@ -199,57 +205,8 @@ export default function CreateListingPage() {
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          {/* Step 1: Category */}
+          {/* Step 1: Images */}
           {currentStep === 1 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Select a Category</CardTitle>
-                <CardDescription>
-                  Choose the category that best describes your item
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <FormField
-                  control={form.control}
-                  name="category"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                          {CATEGORIES.map((category) => {
-                            const Icon = category.icon
-                            return (
-                              <button
-                                key={category.value}
-                                type="button"
-                                onClick={() => field.onChange(category.value)}
-                                className={cn(
-                                  'p-4 rounded-lg border-2 transition-all text-left hover:border-primary',
-                                  field.value === category.value
-                                    ? 'border-primary bg-primary/5 ring-2 ring-primary ring-offset-2'
-                                    : 'border-muted'
-                                )}
-                              >
-                                <Icon className="w-8 h-8 mb-2" />
-                                <h3 className="font-semibold mb-1">{category.label}</h3>
-                                <p className="text-xs text-muted-foreground">
-                                  {category.description}
-                                </p>
-                              </button>
-                            )
-                          })}
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Step 2: Images */}
-          {currentStep === 2 && (
             <Card>
               <CardHeader>
                 <CardTitle>Add Images</CardTitle>
@@ -331,6 +288,29 @@ export default function CreateListingPage() {
                     </div>
                   </div>
                 )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Step 2: Category */}
+          {currentStep === 2 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Select Category</CardTitle>
+                <CardDescription>
+                  We'll analyze your images to suggest the best category
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <AICategoryStep
+                  imageUrls={watchAllFields.images || []}
+                  selectedCategory={watchAllFields.category}
+                  onCategorySelect={(category) => setValue('category', category)}
+                  onError={(error) => {
+                    console.error('AI Category Error:', error)
+                    // Error is already toasted by component
+                  }}
+                />
               </CardContent>
             </Card>
           )}
