@@ -120,3 +120,21 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Custom animations for guide trigger button */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(96, 165, 250, 0.6),
+                0 0 40px rgba(96, 165, 250, 0.4),
+                0 0 60px rgba(96, 165, 250, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(96, 165, 250, 0.8),
+                0 0 60px rgba(96, 165, 250, 0.6),
+                0 0 90px rgba(96, 165, 250, 0.4);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}

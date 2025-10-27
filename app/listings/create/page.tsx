@@ -18,6 +18,8 @@ import { ListingPreview } from '@/components/listings/listing-preview'
 import { AIImageEnhancer } from '@/components/listings/ai-image-enhancer'
 import { AIDescriptionGenerator } from '@/components/listings/ai-description-generator'
 import { AICategoryStep } from '@/components/listings/ai-category-step'
+import { ListingCreationGuide, GuideTarget } from '@/components/listings/guide/listing-creation-guide'
+import { GuideTriggerButton } from '@/components/listings/guide/guide-trigger-button'
 import { createListing } from './actions'
 import {
   createListingSchema,
@@ -49,6 +51,7 @@ export default function CreateListingPage() {
   // Map enhanced URLs to original URLs for AI analysis
   const [imageMapping, setImageMapping] = useState<Record<string, string>>({})
   const [submittedListingId, setSubmittedListingId] = useState<string | null>(null)
+  const [isGuideActive, setIsGuideActive] = useState(false)
 
   const form = useForm<CreateListingFormData>({
     resolver: zodResolver(createListingSchema),
@@ -233,14 +236,16 @@ export default function CreateListingPage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
-                        <ImageUpload
-                          images={field.value || []}
-                          primaryImage={watchAllFields.primaryImage || ''}
-                          onChange={(images, primaryImage) => {
-                            setValue('images', images)
-                            setValue('primaryImage', primaryImage)
-                          }}
-                        />
+                        <div data-guide-target="image-upload">
+                          <ImageUpload
+                            images={field.value || []}
+                            primaryImage={watchAllFields.primaryImage || ''}
+                            onChange={(images, primaryImage) => {
+                              setValue('images', images)
+                              setValue('primaryImage', primaryImage)
+                            }}
+                          />
+                        </div>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -315,15 +320,17 @@ export default function CreateListingPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <AICategoryStep
-                  imageUrls={getOriginalImages(watchAllFields.images || [])}
-                  selectedCategory={watchAllFields.category}
-                  onCategorySelect={(category) => setValue('category', category)}
-                  onError={(error) => {
-                    console.error('AI Category Error:', error)
-                    // Error is already toasted by component
-                  }}
-                />
+                <div data-guide-target="category-select">
+                  <AICategoryStep
+                    imageUrls={getOriginalImages(watchAllFields.images || [])}
+                    selectedCategory={watchAllFields.category}
+                    onCategorySelect={(category) => setValue('category', category)}
+                    onError={(error) => {
+                      console.error('AI Category Error:', error)
+                      // Error is already toasted by component
+                    }}
+                  />
+                </div>
               </CardContent>
             </Card>
           )}
@@ -337,7 +344,7 @@ export default function CreateListingPage() {
                   Provide details about your item
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-6" data-guide-target="details-form">
                 {/* AI Description Generator with Title - shown if images uploaded */}
                 {watchAllFields.images && watchAllFields.images.length > 0 && watchAllFields.category && (
                   <AIDescriptionGenerator
@@ -465,11 +472,12 @@ export default function CreateListingPage() {
                     <FormItem>
                       <FormLabel>Pricing Type</FormLabel>
                       <FormControl>
-                        <RadioGroup
-                          onValueChange={field.onChange}
-                          value={field.value}
-                          className="space-y-3"
-                        >
+                        <div data-guide-target="pricing-options">
+                          <RadioGroup
+                            onValueChange={field.onChange}
+                            value={field.value}
+                            className="space-y-3"
+                          >
                           <div
                             className={cn(
                               'flex items-start space-x-3 p-4 rounded-lg border-2 transition-all',
@@ -503,6 +511,7 @@ export default function CreateListingPage() {
                             </label>
                           </div>
                         </RadioGroup>
+                        </div>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -593,7 +602,7 @@ export default function CreateListingPage() {
                   Where is this item located?
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-6" data-guide-target="location-form">
                 <FormField
                   control={form.control}
                   name="city"
@@ -698,23 +707,47 @@ export default function CreateListingPage() {
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             ) : (
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Creating...
-                  </>
-                ) : (
-                  <>
-                    <Check className="w-4 h-4 mr-2" />
-                    Create Listing
-                  </>
-                )}
-              </Button>
+              <div data-guide-target="submit-button">
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Creating...
+                    </>
+                  ) : (
+                    <>
+                      <Check className="w-4 h-4 mr-2" />
+                      Create Listing
+                    </>
+                  )}
+                </Button>
+              </div>
             )}
           </div>
         </form>
       </Form>
+
+      {/* Interactive Guide */}
+      <ListingCreationGuide
+        formStep={currentStep}
+        hasImages={(watchAllFields.images?.length || 0) > 0}
+        hasCategory={!!watchAllFields.category}
+        hasTitle={!!watchAllFields.title && watchAllFields.title.length > 0}
+        hasDescription={!!watchAllFields.description && watchAllFields.description.length > 0}
+        hasPricing={
+          !!watchAllFields.pricingType &&
+          (watchAllFields.pricingType === 'OFFERS' || !!watchAllFields.price)
+        }
+        hasLocation={!!watchAllFields.city && !!watchAllFields.province}
+        isGuideActive={isGuideActive}
+        onToggleGuide={() => setIsGuideActive(false)}
+      />
+
+      {/* Animated Guide Trigger Button */}
+      <GuideTriggerButton
+        onClick={() => setIsGuideActive(!isGuideActive)}
+        isActive={isGuideActive}
+      />
     </div>
   )
 }
